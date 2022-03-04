@@ -1,2 +1,1 @@
-# Automatic Remediation Demo
 

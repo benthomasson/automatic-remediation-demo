@@ -1,0 +1,51 @@
+---
+- name: Install Prometheus 
+  hosts: prometheus
+  vars:
+    redirect_url: https://prometheus-prod-10-prod-us-central-0.grafana.net/api/prom/push
+    redirect_auth:
+      username: 349634
+      password: eyJrIjoiZmI1NTg4NjExYmZhYjdmNGE2YzFjNTFlMGJjZmE2YThlYmY4ZmNhMiIsIm4iOiJub2RlZXhwdm0iLCJpZCI6NjEwNTIyfQ==
+  tasks:
+    - name: Install Docker Repo
+      shell: dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+
+    - name: Install Docker and Docker Compose
+      dnf:
+        name:
+          - containerd.io
+          - docker-ce
+          - docker-ce-cli
+        state: latest
+
+    - name: Remove Podman if RHEL 8
+      dnf:
+        name:
+          - podman
+          - podman-docker
+          - runc
+        state: absent
+    - pip:
+        name: docker-compose
+    - name: Create Docker Compose File
+      template:
+        src: ../files/docker-compose.yml.j2
+        dest: ~/docker-compose.yml
+        owner: root
+        group: nobody
+        mode: u=rw,g=r,o=r
+    - name: Create Prometheus file
+      template:
+        src: ../files/prometheus.yml.j2
+        dest: ~/prometheus.yml
+        owner: root
+        group: nobody
+        mode: u=rw,g=r,o=r
+
+    - name: Remove Docker Compose created containers
+      command: docker-compose down
+
+    - name: Docker Compose Up
+      command: docker-compose up -d
+
+

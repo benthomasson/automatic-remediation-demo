@@ -1,0 +1,6 @@
+[prometheus]
+localhost           ansible_connection=local
+
+
+[nodes]
+localhost           ansible_connection=local
