@@ -10,6 +10,23 @@ volumes:
 
 services:
 
+  eda:
+    image: quay.io/bthomass/events-demo:latest
+    container_name: eda
+    restart: unless-stopped
+    command:
+      - 'ansible-events'
+      - 'rules.yml'
+      - '-i=inventory.yml'
+      - '-S=sources'
+      - '--debug'
+    expose:
+      - 5001
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
+
   prometheus:
     image: prom/prometheus:v2.17.1
     container_name: prometheus
@@ -24,6 +41,9 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONIOENCODING=UTF-8
     expose:
       - 9090
     networks:
